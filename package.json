@@ -27,7 +27,10 @@
   "scripts": {
     "prepare": "husky",
     "lint": "eslint .",
-    "lint:fix": "eslint --fix ."
+    "lint:fix": "eslint --fix .",
+    "start": "ts-node-dev --respawn --transpile-only --exit-child src/server.ts",
+    "db:migrate": "npx prisma migrate dev --name goal-reacher --create-only && npx prisma generate",
+    "db:push": "npx prisma db push"
   },
   "type": "module"
 }
