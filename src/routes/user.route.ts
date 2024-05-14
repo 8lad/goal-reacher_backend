@@ -6,5 +6,6 @@ const router = Router();
 
 router.post(RouterPaths.Register, UserController.createUser);
 router.post(RouterPaths.Login, UserController.loginUser);
+router.get(RouterPaths.Logout, UserController.logoutUser);
 
 export default router;
