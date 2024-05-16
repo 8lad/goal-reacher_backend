@@ -12,7 +12,7 @@ export default [
   eslintPluginPrettierRecommended,
   {
     rules: {
-      'no-console': 'warn',
+      'no-console': ['warn', { allow: ['warn', 'error', 'info'] }],
     },
   },
 ];

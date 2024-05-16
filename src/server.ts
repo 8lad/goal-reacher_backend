@@ -9,7 +9,12 @@ export const prisma = new PrismaClient();
 const main = async () => {
   app.use(express.json());
 
-  app.use(process.env.BASE_ROUTE || '', UserRouter);
+  app.use(process.env.BASE_ROUTE as string, UserRouter);
+
+  // TODO This route is for the redirection, remove after improvment
+  app.get(process.env.BASE_ROUTE as string, async (req: Request, res: Response) => {
+    res.status(200).json({ message: 'Base route works' });
+  });
 
   app.use(
     cors({
@@ -17,6 +22,7 @@ const main = async () => {
       methods: ['GET', 'PUT', 'POST', 'DELETE'],
     }),
   );
+
   app.all('*', (req: Request, res: Response) => {
     res.status(404).json({ error: 'Route not found' });
   });
@@ -28,7 +34,7 @@ const main = async () => {
   });
 
   app.listen(process.env.SERVER_PORT, () => {
-    console.log(`Server runs on the ${process.env.SERVER_PORT} port`);
+    console.info(`Server runs on the ${process.env.SERVER_PORT} port`);
   });
 };
 
