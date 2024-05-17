@@ -19,6 +19,7 @@ name String
 email String @unique
 password String
 createdAt DateTime @default(now())
+isDeleted Boolean @default(false)
 goals Goal[]
 @@map("users")
 }
