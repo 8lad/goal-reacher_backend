@@ -1,3 +1,4 @@
+import { Prisma } from '@prisma/client';
 import { Request } from 'express';
 
 export interface UserRequestBody extends Request {
@@ -27,4 +28,12 @@ export interface CreateUserInput {
   name: string;
   email: string;
   password: string;
+}
+
+export type UserSelectedFields = {
+  [key in keyof Prisma.UserSelect]?: boolean;
+};
+export interface UserQuerySelect {
+  where: Prisma.UserWhereUniqueInput;
+  select?: UserSelectedFields;
 }

@@ -1,12 +1,10 @@
 import { Response, Request } from 'express';
-import { prisma } from '../server.ts';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
 import { UserRequestBody, UserRequestWithToken } from '../utils/types.ts';
 import { getErrorResponseObject, getSuccessResponseObject } from '../utils/helpers.ts';
 import UserRepository from '../repositories/user.repository.ts';
-
-const salt = 10;
+import { SALT } from '../utils/constants.ts';
 
 const createUser = async (req: UserRequestBody, res: Response) => {
   try {
@@ -17,24 +15,24 @@ const createUser = async (req: UserRequestBody, res: Response) => {
       return;
     }
 
-    bcrypt.hash(password, salt, async (error, hash) => {
+    const existingUser = await UserRepository.getExistingUser(email);
+
+    if (existingUser && existingUser.isDeleted) {
+      return res.status(500).json(getErrorResponseObject('This account was deleted'));
+    }
+
+    if (existingUser) {
+      return res.status(500).json(getErrorResponseObject('User already exists'));
+    }
+
+    bcrypt.hash(password, SALT, async (error, hash) => {
       if (error) {
         return res.status(500).json(getErrorResponseObject('Hashing password issue'));
       }
-      const existingUser = await prisma.user.findUnique({
-        where: {
-          email,
-        },
-      });
-      if (existingUser) {
-        return res.status(500).json(getErrorResponseObject('User already exists'));
-      }
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const newUser = await UserRepository.createUser({
-        name,
-        email,
-        password: hash,
-      });
+
+      const newUserData = { name, email, password: hash };
+      await UserRepository.createUser(newUserData);
+
       res.status(200).json(getSuccessResponseObject('User created'));
     });
   } catch (error) {
@@ -43,28 +41,26 @@ const createUser = async (req: UserRequestBody, res: Response) => {
 };
 
 const loginUser = async (req: UserRequestBody, res: Response) => {
+  const { email, password } = req.body;
+
+  if (!email || !password) {
+    res.status(400).json(getErrorResponseObject('Bad request. Empty input fields'));
+    return;
+  }
+
   try {
-    const user = await prisma.user.findUnique({
-      where: { email: req.body.email },
-      select: {
-        password: true,
-        email: true,
-        name: true,
-        id: true,
-      },
-    });
+    const user = await UserRepository.getExistingUser(email);
     if (!user) {
-      res.status(500).json(getErrorResponseObject('User not found'));
-      return;
-    }
-    const requestPassword = req.body.password;
-
-    if (!requestPassword) {
-      res.status(400).json(getErrorResponseObject('Bad request. Empty password field'));
+      res.status(400).json(getErrorResponseObject('User not found'));
       return;
     }
 
-    bcrypt.compare(requestPassword, user.password, (error, response) => {
+    if (user.isDeleted) {
+      res.status(400).json(getErrorResponseObject('This account is unavailable now'));
+      return;
+    }
+
+    bcrypt.compare(password, user.password, (error, response) => {
       if (error) {
         res.status(500).json(getErrorResponseObject('Password uncoding issue'));
         return;
@@ -81,7 +77,7 @@ const loginUser = async (req: UserRequestBody, res: Response) => {
       res.status(500).json(getErrorResponseObject('Password is not matched'));
     });
   } catch (error) {
-    res.status(500).json(getErrorResponseObject('Can`t find the exact user'));
+    res.status(400).json(getErrorResponseObject('Can`t find the exact user'));
   }
 };
 
@@ -95,16 +91,17 @@ const logoutUser = async (req: Request, res: Response) => {
 };
 
 const deleteUser = async (req: UserRequestWithToken, res: Response) => {
+  const { password } = req.body;
   try {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const deletedUser = await prisma.user.update({
-      where: {
-        email: req.body.email,
-      },
-      data: {
-        isDeleted: true,
-      },
-    });
+    if (!password) {
+      res.status(400).json(getErrorResponseObject('Bad request. Empty input fields'));
+      return;
+    }
+    if (!req.userId) {
+      res.status(400).json(getErrorResponseObject('Bad request. Authorization issue'));
+      return;
+    }
+    await UserRepository.deleteUser(req.userId);
     res.clearCookie('token');
     res.status(200).json(getSuccessResponseObject('User deleted'));
   } catch (error) {
@@ -113,20 +110,14 @@ const deleteUser = async (req: UserRequestWithToken, res: Response) => {
 };
 
 const updateUser = async (req: UserRequestWithToken, res: Response) => {
+  const { email, name } = req.body;
   try {
-    const user = await prisma.user.update({
-      where: {
-        email: req.body.email,
-      },
-      data: {
-        name: req.body.name,
-      },
-    });
+    const user = await UserRepository.updateUser(email!, name!);
     if (!user) {
       res.status(500).json(getErrorResponseObject('User not found'));
       return;
     }
-    res.status(200).json(req.cookies);
+    res.status(200).json(getSuccessResponseObject('User data updated'));
   } catch (error) {
     res.status(500).json(getErrorResponseObject('Update user error'));
   }

@@ -6,3 +6,5 @@ export enum RouterPaths {
   UpdateUser = '/update-user',
   Dashboards = '/dashboards',
 }
+
+export const SALT = 10;
