@@ -1,6 +1,6 @@
-import { UserRequestWithToken } from '../utils/types.ts';
 import { NextFunction, Response } from 'express';
 import bcrypt from 'bcrypt';
+import { UserRequestWithToken } from '../utils/types.ts';
 import { createSelectDatabaseObject, getErrorResponseObject } from '../utils/helpers.ts';
 import userRepository from '../repositories/user.repository.ts';
 

@@ -11,29 +11,29 @@ const createUser = async (req: UserRequestBody, res: Response) => {
     const { name, email, password } = req.body;
 
     if (!password || !email || !name) {
-      res.status(400).json(getErrorResponseObject('Bad request. Empty fields detected'));
+      res.status(400).json(getErrorResponseObject('Bad request. Empty input fields'));
       return;
     }
 
     const existingUser = await UserRepository.getExistingUser(email);
 
     if (existingUser && existingUser.isDeleted) {
-      return res.status(500).json(getErrorResponseObject('This account was deleted'));
+      return res.status(400).json(getErrorResponseObject('This account was deleted'));
     }
 
     if (existingUser) {
-      return res.status(500).json(getErrorResponseObject('User already exists'));
+      return res.status(400).json(getErrorResponseObject('User already exists'));
     }
 
     bcrypt.hash(password, SALT, async (error, hash) => {
       if (error) {
-        return res.status(500).json(getErrorResponseObject('Hashing password issue'));
+        return res.status(400).json(getErrorResponseObject('Hashing password issue'));
       }
 
       const newUserData = { name, email, password: hash };
       await UserRepository.createUser(newUserData);
 
-      res.status(200).json(getSuccessResponseObject('User created'));
+      res.status(201).json(getSuccessResponseObject('User created'));
     });
   } catch (error) {
     res.status(500).json(getErrorResponseObject('Registration error. Try again later'));
@@ -70,11 +70,11 @@ const loginUser = async (req: UserRequestBody, res: Response) => {
           expiresIn: '1h',
         });
         res.cookie('token', token, { secure: true });
-        //TODO Update option for cookie when is ready to deploy on the real server {httpOnly: true} + add redirection
+        //TODO Update option for cookie when is ready to deploy on the real server {httpOnly: true}
         res.status(200).json(getSuccessResponseObject('Login success'));
         return;
       }
-      res.status(500).json(getErrorResponseObject('Password is not matched'));
+      res.status(400).json(getErrorResponseObject('Password is not matched'));
     });
   } catch (error) {
     res.status(400).json(getErrorResponseObject('Can`t find the exact user'));
@@ -97,11 +97,8 @@ const deleteUser = async (req: UserRequestWithToken, res: Response) => {
       res.status(400).json(getErrorResponseObject('Bad request. Empty input fields'));
       return;
     }
-    if (!req.userId) {
-      res.status(400).json(getErrorResponseObject('Bad request. Authorization issue'));
-      return;
-    }
-    await UserRepository.deleteUser(req.userId);
+
+    await UserRepository.deleteUser(req.userId!);
     res.clearCookie('token');
     res.status(200).json(getSuccessResponseObject('User deleted'));
   } catch (error) {
@@ -114,7 +111,7 @@ const updateUser = async (req: UserRequestWithToken, res: Response) => {
   try {
     const user = await UserRepository.updateUser(email!, name!);
     if (!user) {
-      res.status(500).json(getErrorResponseObject('User not found'));
+      res.status(400).json(getErrorResponseObject('User not found'));
       return;
     }
     res.status(200).json(getSuccessResponseObject('User data updated'));

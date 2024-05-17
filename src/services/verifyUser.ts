@@ -13,6 +13,10 @@ export const verifyUser = (req: UserRequestWithToken, res: Response, next: NextF
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET as string) as JwtPayload;
+    if (!decoded.id) {
+      res.status(400).json(getErrorResponseObject('Bad request. Authorization issue'));
+      return;
+    }
     req.userId = decoded.id;
     next();
   } catch (error) {
