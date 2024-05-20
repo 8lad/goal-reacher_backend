@@ -1,12 +1,12 @@
 import { Response, Request } from 'express';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
-import { UserRequestBody, UserRequestWithToken } from '../utils/types.ts';
+import { UserRequestBody, RequestWithToken } from '../utils/types.ts';
 import { getErrorResponseObject, getSuccessResponseObject } from '../utils/helpers.ts';
 import UserRepository from '../repositories/user.repository.ts';
 import { SALT } from '../utils/constants.ts';
 
-const createUser = async (req: UserRequestBody, res: Response) => {
+const createUser = async (req: Request<UserRequestBody>, res: Response) => {
   try {
     const { name, email, password } = req.body;
 
@@ -40,7 +40,7 @@ const createUser = async (req: UserRequestBody, res: Response) => {
   }
 };
 
-const loginUser = async (req: UserRequestBody, res: Response) => {
+const loginUser = async (req: Request<UserRequestBody>, res: Response) => {
   const { email, password } = req.body;
 
   if (!email || !password) {
@@ -90,7 +90,7 @@ const logoutUser = async (req: Request, res: Response) => {
   }
 };
 
-const deleteUser = async (req: UserRequestWithToken, res: Response) => {
+const deleteUser = async (req: RequestWithToken<UserRequestBody>, res: Response) => {
   const { password } = req.body;
   try {
     if (!password) {
@@ -106,7 +106,7 @@ const deleteUser = async (req: UserRequestWithToken, res: Response) => {
   }
 };
 
-const updateUser = async (req: UserRequestWithToken, res: Response) => {
+const updateUser = async (req: RequestWithToken<UserRequestBody>, res: Response) => {
   const { email, name } = req.body;
   try {
     const user = await UserRepository.updateUser(email!, name!);

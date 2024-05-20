@@ -1,11 +1,11 @@
 import { NextFunction, Response } from 'express';
 import bcrypt from 'bcrypt';
-import { UserRequestWithToken } from '../utils/types.ts';
+import { RequestWithToken, UserRequestBody } from '../utils/types.ts';
 import { createSelectDatabaseObject, getErrorResponseObject } from '../utils/helpers.ts';
 import userRepository from '../repositories/user.repository.ts';
 
 export const checkPassword = async (
-  req: UserRequestWithToken,
+  req: RequestWithToken<UserRequestBody>,
   res: Response,
   next: NextFunction,
 ) => {
