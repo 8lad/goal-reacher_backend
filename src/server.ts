@@ -1,4 +1,4 @@
-import express, { Response, Request, NextFunction } from 'express';
+import express from 'express';
 import { PrismaClient } from '@prisma/client';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
@@ -8,6 +8,8 @@ import UserRouter from './routes/user.route.ts';
 import GoalRouter from './routes/goal.route.ts';
 import { getErrorResponseObject } from './utils/helpers.ts';
 import { REQUESTS_AMOUNT_LIMIT, REQUESTS_TIME_LIMIT } from './utils/constants.ts';
+import { customErrorHandler } from './services/customErrorHandler.ts';
+import { notFoundErrorHandler } from './services/notFoundErrorHandler.ts';
 
 const app = express();
 export const prisma = new PrismaClient();
@@ -38,15 +40,9 @@ const main = async () => {
   app.use(process.env.BASE_ROUTE as string, UserRouter);
   app.use(process.env.BASE_ROUTE as string, GoalRouter);
 
-  app.all('*', (req: Request, res: Response) => {
-    res.status(404).json({ error: 'Route not found' });
-  });
+  app.all('*', notFoundErrorHandler);
 
-  app.use((error: Error, req: Request, res: Response, next: NextFunction) => {
-    console.error(error.stack);
-    res.status(500).json({ error: 'Internal server error' });
-    next();
-  });
+  app.use(customErrorHandler);
 
   app.listen(process.env.SERVER_PORT, () => {
     console.info(`Server runs on the ${process.env.SERVER_PORT} port`);

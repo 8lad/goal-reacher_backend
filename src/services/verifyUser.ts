@@ -1,10 +1,10 @@
 import { NextFunction, Response } from 'express';
 import jwt, { JwtPayload } from 'jsonwebtoken';
 import { getErrorResponseObject } from '../utils/helpers.ts';
-import { RequestWithToken, UserRequestBody } from '../utils/types.ts';
+import { GoalRequestBody, RequestWithToken, UserRequestBody } from '../utils/types.ts';
 
 export const verifyUser = (
-  req: RequestWithToken<UserRequestBody>,
+  req: RequestWithToken<UserRequestBody | GoalRequestBody>,
   res: Response,
   next: NextFunction,
 ) => {
