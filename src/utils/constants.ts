@@ -5,8 +5,8 @@ export enum RouterPaths {
   DeleteUser = '/users-delete',
   UpdateUser = '/users-update',
   Dashboards = '/dashboards',
-  CreateGoal = '/goals/:goalId',
-  AllGoals = '/goals',
+  Goals = '/goals',
+  SingleGoal = '/goals/:id',
 }
 
 export const SALT = 10;

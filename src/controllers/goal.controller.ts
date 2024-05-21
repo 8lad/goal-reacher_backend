@@ -1,20 +1,21 @@
 import { Response } from 'express';
-import { GoalInput, GoalRequestBody, RequestWithToken } from '../utils/types.ts';
+import { GoalInput, GoalRequestBody, RequestWithToken, GoalStatus } from '../utils/types.ts';
 import { getErrorResponseObject } from '../utils/helpers.ts';
 import GoalRepository from '../repositories/goal.repository.ts';
 
 const createGoal = async (req: RequestWithToken<GoalRequestBody>, res: Response) => {
-  if (!Object.keys(req.body).length) {
-    res.status(400).json(getErrorResponseObject('Bad request. Empty input fields'));
-  }
   try {
     const newGoalData = {
       ...req.body,
-      userId: Number(req.userId!),
+      status: GoalStatus.PENDING,
+      userId: Number(req.userId),
     };
-    await GoalRepository.createGoal(newGoalData as GoalInput);
+    const newGoal = await GoalRepository.createGoal(newGoalData as GoalInput);
+    res.status(200).json(newGoal);
   } catch (error) {
-    res.status(400).json(getErrorResponseObject('Bad request. Input data invalid'));
+    res
+      .status(500)
+      .json(getErrorResponseObject("Internal server error. Couldn't create a new goal"));
   }
 };
 

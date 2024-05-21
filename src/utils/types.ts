@@ -61,3 +61,9 @@ export interface GoalInput
   > {
   userId: number;
 }
+
+export enum GoalStatus {
+  PENDING = 'PENDING',
+  FAILED = 'FAILED',
+  SUCCESS = 'SUCCESS',
+}
