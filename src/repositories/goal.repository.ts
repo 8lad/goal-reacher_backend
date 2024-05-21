@@ -15,10 +15,11 @@ const deleteGoal = async (goalId: number) => {
   });
 };
 
-const getSingleGoal = async (goalId: number) => {
+const getSingleGoal = async (goalId: number, userId: number) => {
   return await prisma.goal.findUnique({
     where: {
       id: goalId,
+      userId,
     },
   });
 };

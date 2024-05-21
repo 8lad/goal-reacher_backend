@@ -21,10 +21,6 @@ const createGoal = async (req: RequestWithToken<GoalRequestBody>, res: Response)
 
 const deleteGoal = async (req: Request, res: Response) => {
   const goalId = req.params.id;
-  if (!goalId || isNaN(Number(goalId))) {
-    res.status(400).json(getErrorResponseObject("Bad request. Can't identify goal"));
-    return;
-  }
 
   try {
     const deletedGoal = await GoalRepository.deleteGoal(Number(goalId));
@@ -39,7 +35,36 @@ const deleteGoal = async (req: Request, res: Response) => {
   }
 };
 
+const getAllGoals = async (req: RequestWithToken<unknown>, res: Response) => {
+  const userId = Number(req.userId);
+  try {
+    const allGoals = await GoalRepository.getUserGoals(userId);
+    if (!allGoals) {
+      res.status(404).json(getErrorResponseObject("Not found. Can't find any goals"));
+      return;
+    }
+    res.status(200).json(allGoals);
+  } catch (error) {
+    res
+      .status(500)
+      .json(getErrorResponseObject("Internal server error. Can't get all goals for the user"));
+  }
+};
+
+const getSingleGoal = async (req: RequestWithToken<unknown>, res: Response) => {
+  const goalId = Number(req.params.id);
+
+  try {
+    const singleGoal = await GoalRepository.getSingleGoal(goalId, Number(req.userId));
+    res.status(200).json(singleGoal);
+  } catch (error) {
+    res.status(500).json(getErrorResponseObject("Internal server error. Can't get curren goal"));
+  }
+};
+
 export default {
   createGoal,
   deleteGoal,
+  getAllGoals,
+  getSingleGoal,
 };
