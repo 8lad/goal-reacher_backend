@@ -102,7 +102,7 @@ const updateUser = async (req: RequestWithToken<UserRequestBody>, res: Response)
       res.status(400).json(getErrorResponseObject('User not found'));
       return;
     }
-    res.status(200).json(getSuccessResponseObject('User data updated'));
+    res.status(200).json({ id: user.id, name: user.name, email: user.email });
   } catch (error) {
     res.status(500).json(getErrorResponseObject('Update user error'));
   }

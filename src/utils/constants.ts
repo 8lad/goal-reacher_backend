@@ -1,13 +1,12 @@
 export enum RouterPaths {
-  Register = '/register',
-  Login = '/login',
-  Logout = '/logout',
-  DeleteUser = '/delete-user',
-  UpdateUser = '/update-user',
+  Register = '/users',
+  Login = '/users-login',
+  Logout = '/users-logout',
+  DeleteUser = '/users-delete',
+  UpdateUser = '/users-update',
   Dashboards = '/dashboards',
-  CreateGoal = '/create-goal/:goalId',
-  UpdateGoal = '/update-goal/:goalId',
-  AllGoals = '/all-goals',
+  CreateGoal = '/goals/:goalId',
+  AllGoals = '/goals',
 }
 
 export const SALT = 10;
