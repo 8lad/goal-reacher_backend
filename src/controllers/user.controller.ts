@@ -16,7 +16,7 @@ const createUser = async (
     const existingUser = await UserRepository.getExistingUser(email);
 
     if (existingUser && existingUser.isDeleted) {
-      return res.status(400).json(getErrorResponseObject('This account was deleted'));
+      return res.status(403).json(getErrorResponseObject('This account was deleted'));
     }
 
     if (existingUser) {
@@ -25,7 +25,7 @@ const createUser = async (
 
     bcrypt.hash(password, SALT, async (error, hash) => {
       if (error) {
-        return res.status(400).json(getErrorResponseObject('Hashing password issue'));
+        return res.status(500).json(getErrorResponseObject('Hashing password issue'));
       }
 
       const newUserData = { name, email, password: hash };
@@ -44,12 +44,12 @@ const loginUser = async (req: CustomRequest<UserRequestBody>, res: Response) => 
   try {
     const user = await UserRepository.getExistingUser(email);
     if (!user) {
-      res.status(400).json(getErrorResponseObject('User not found'));
+      res.status(404).json(getErrorResponseObject('User not found'));
       return;
     }
 
     if (user.isDeleted) {
-      res.status(400).json(getErrorResponseObject('This account was deleted'));
+      res.status(403).json(getErrorResponseObject('This account was deleted'));
       return;
     }
 
@@ -62,15 +62,15 @@ const loginUser = async (req: CustomRequest<UserRequestBody>, res: Response) => 
         const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET as string, {
           expiresIn: '1h',
         });
-        res.cookie('token', token, { secure: true });
-        //TODO Update option for cookie when is ready to deploy on the real server {httpOnly: true}
+
+        res.cookie('token', token, { secure: true, httpOnly: true });
         res.status(200).json(getSuccessResponseObject('Login success'));
         return;
       }
       res.status(400).json(getErrorResponseObject('Password is not matched'));
     });
   } catch (error) {
-    res.status(400).json(getErrorResponseObject('Can`t find the exact user'));
+    res.status(404).json(getErrorResponseObject('Can`t find the exact user'));
   }
 };
 
@@ -79,7 +79,7 @@ const logoutUser = async (req: Request, res: Response) => {
     res.clearCookie('token');
     res.status(200).json(getSuccessResponseObject('Loguout success'));
   } catch (error) {
-    res.status(500).json(getErrorResponseObject('Logout error'));
+    res.status(500).json(getErrorResponseObject('Internal server error. Logout error'));
   }
 };
 
@@ -89,7 +89,7 @@ const deleteUser = async (req: RequestWithToken<UserRequestBody>, res: Response)
     res.clearCookie('token');
     res.status(200).json(getSuccessResponseObject('User deleted'));
   } catch (error) {
-    res.status(500).json(getErrorResponseObject('Delete user error'));
+    res.status(500).json(getErrorResponseObject('Internal server error. Delete user error'));
   }
 };
 
@@ -99,12 +99,12 @@ const updateUser = async (req: RequestWithToken<UserRequestBody>, res: Response)
   try {
     const user = await UserRepository.updateUser(userId, name);
     if (!user) {
-      res.status(400).json(getErrorResponseObject('User not found'));
+      res.status(404).json(getErrorResponseObject('User not found'));
       return;
     }
     res.status(200).json({ id: user.id, name: user.name, email: user.email });
   } catch (error) {
-    res.status(500).json(getErrorResponseObject('Update user error'));
+    res.status(500).json(getErrorResponseObject('Internal server error. Update user error'));
   }
 };
 
