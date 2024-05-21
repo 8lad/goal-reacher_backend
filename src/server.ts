@@ -10,6 +10,9 @@ import { getErrorResponseObject } from './utils/helpers.ts';
 import { REQUESTS_AMOUNT_LIMIT, REQUESTS_TIME_LIMIT } from './utils/constants.ts';
 import { customErrorHandler } from './services/customErrorHandler.ts';
 import { notFoundErrorHandler } from './services/notFoundErrorHandler.ts';
+import { checkAllEnv } from './utils/checkAllEnv.ts';
+
+checkAllEnv();
 
 const app = express();
 export const prisma = new PrismaClient();

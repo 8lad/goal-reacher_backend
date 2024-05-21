@@ -1,4 +1,4 @@
-import { GoalMeasure, GoalStatus, Prisma } from '@prisma/client';
+import { GoalMeasure, Prisma } from '@prisma/client';
 import { Request } from 'express';
 
 type RequireExcept<T, K extends keyof T> = Required<T> & Partial<Pick<T, K>>;
@@ -42,16 +42,15 @@ export interface UserQuerySelect {
 }
 
 export interface GoalRequestBody {
-  emoji?: string;
-  measureType?: GoalMeasure;
-  title?: string;
-  content?: string;
-  finalDate?: string;
+  emoji: string;
+  measureType: GoalMeasure;
+  title: string;
+  content: string;
+  finalDate: string;
+  progress: number;
+  finalGoal: number;
   failMotivation?: string;
   successMotivation?: string;
-  step?: number;
-  status?: GoalStatus;
-  finalGoal?: number;
   categoryId?: number;
 }
 
