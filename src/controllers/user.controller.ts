@@ -1,19 +1,17 @@
 import { Response, Request } from 'express';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
-import { UserRequestBody, RequestWithToken } from '../utils/types.ts';
+import { UserRequestBody, RequestWithToken, CustomRequest } from '../utils/types.ts';
 import { getErrorResponseObject, getSuccessResponseObject } from '../utils/helpers.ts';
 import UserRepository from '../repositories/user.repository.ts';
 import { SALT } from '../utils/constants.ts';
 
-const createUser = async (req: Request<UserRequestBody>, res: Response) => {
+const createUser = async (
+  req: CustomRequest<Omit<UserRequestBody, 'isDeleted'>>,
+  res: Response,
+) => {
   try {
     const { name, email, password } = req.body;
-
-    if (!password || !email || !name) {
-      res.status(400).json(getErrorResponseObject('Bad request. Empty input fields'));
-      return;
-    }
 
     const existingUser = await UserRepository.getExistingUser(email);
 
@@ -40,13 +38,8 @@ const createUser = async (req: Request<UserRequestBody>, res: Response) => {
   }
 };
 
-const loginUser = async (req: Request<UserRequestBody>, res: Response) => {
+const loginUser = async (req: CustomRequest<UserRequestBody>, res: Response) => {
   const { email, password } = req.body;
-
-  if (!email || !password) {
-    res.status(400).json(getErrorResponseObject('Bad request. Empty input fields'));
-    return;
-  }
 
   try {
     const user = await UserRepository.getExistingUser(email);
@@ -56,7 +49,7 @@ const loginUser = async (req: Request<UserRequestBody>, res: Response) => {
     }
 
     if (user.isDeleted) {
-      res.status(400).json(getErrorResponseObject('This account is unavailable now'));
+      res.status(400).json(getErrorResponseObject('This account was deleted'));
       return;
     }
 
@@ -91,13 +84,7 @@ const logoutUser = async (req: Request, res: Response) => {
 };
 
 const deleteUser = async (req: RequestWithToken<UserRequestBody>, res: Response) => {
-  const { password } = req.body;
   try {
-    if (!password) {
-      res.status(400).json(getErrorResponseObject('Bad request. Empty input fields'));
-      return;
-    }
-
     await UserRepository.deleteUser(req.userId!);
     res.clearCookie('token');
     res.status(200).json(getSuccessResponseObject('User deleted'));
@@ -107,9 +94,10 @@ const deleteUser = async (req: RequestWithToken<UserRequestBody>, res: Response)
 };
 
 const updateUser = async (req: RequestWithToken<UserRequestBody>, res: Response) => {
-  const { email, name } = req.body;
+  const { name } = req.body;
+  const userId = Number(req.userId);
   try {
-    const user = await UserRepository.updateUser(email!, name!);
+    const user = await UserRepository.updateUser(userId, name);
     if (!user) {
       res.status(400).json(getErrorResponseObject('User not found'));
       return;

@@ -3,12 +3,15 @@ import { Request } from 'express';
 
 type RequireExcept<T, K extends keyof T> = Required<T> & Partial<Pick<T, K>>;
 export interface UserRequestBody {
-  name?: string;
-  password?: string;
-  isDeleted?: boolean;
-  email?: string;
+  name: string;
+  password: string;
+  isDeleted: boolean;
+  email: string;
 }
 
+export interface CustomRequest<T> extends Request {
+  body: T;
+}
 export interface RequestWithToken<T> extends Request {
   userId?: string;
   body: T;

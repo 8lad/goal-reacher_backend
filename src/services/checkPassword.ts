@@ -10,14 +10,16 @@ export const checkPassword = async (
   next: NextFunction,
 ) => {
   const { email, password } = req.body;
-  if (!email || !password) {
-    res.status(400).json(getErrorResponseObject('Bad request. Empty input fields'));
+  const userId = Number(req.userId);
+
+  if (!email && !req.userId) {
+    res.status(400).json(getErrorResponseObject('User not found'));
     return;
   }
 
   try {
     const userSelectObject = createSelectDatabaseObject(['email', 'password']);
-    const currentUser = await userRepository.getExistingUser(email, userSelectObject);
+    const currentUser = await userRepository.getExistingUser(userId || email, userSelectObject);
 
     if (!currentUser) {
       res.status(400).json(getErrorResponseObject('User not found'));
@@ -26,7 +28,7 @@ export const checkPassword = async (
 
     bcrypt.compare(password, currentUser.password, (error, result) => {
       if (error) {
-        res.status(500).json(getErrorResponseObject('Internal server error'));
+        res.status(500).json(getErrorResponseObject('Internal server error. Password validation'));
         return;
       }
       if (result) {
@@ -37,6 +39,6 @@ export const checkPassword = async (
       return;
     });
   } catch (error) {
-    res.status(500).json(getErrorResponseObject('Internal server error'));
+    res.status(500).json(getErrorResponseObject('Internal server error. Checking password error'));
   }
 };
