@@ -1,7 +1,7 @@
 import { GoalMeasure, Prisma } from '@prisma/client';
 import { Request } from 'express';
 
-type RequireExcept<T, K extends keyof T> = Required<T> & Partial<Pick<T, K>>;
+export type RequireExcept<T, K extends keyof T> = Required<T> & Partial<Pick<T, K>>;
 export interface UserRequestBody {
   name: string;
   password: string;
@@ -52,13 +52,10 @@ export interface GoalRequestBody {
   failMotivation?: string;
   successMotivation?: string;
   categoryId?: number;
+  status?: GoalStatus;
 }
 
-export interface GoalInput
-  extends RequireExcept<
-    GoalRequestBody,
-    'successMotivation' | 'failMotivation' | 'categoryId' | 'emoji'
-  > {
+export interface GoalInput extends GoalRequestBody {
   userId: number;
 }
 

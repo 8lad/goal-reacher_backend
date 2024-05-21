@@ -14,4 +14,6 @@ router.post(
   GoalController.createGoal,
 );
 
+router.delete(RouterPaths.SingleGoal, verifyUser, GoalController.deleteGoal);
+
 export default router;
