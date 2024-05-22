@@ -1,7 +1,7 @@
 import { Response, NextFunction } from 'express';
-import { getErrorResponseObject } from '../utils/helpers.ts';
-import GoalRepository from '../repositories/goal.repository.ts';
-import { RequestWithToken } from '../utils/types.ts';
+import { getErrorResponseObject } from '../utils/helpers';
+import GoalRepository from '../repositories/goal.repository';
+import { RequestWithToken } from '../utils/types';
 
 export const checkGoalExisting = async (
   req: RequestWithToken<unknown>,

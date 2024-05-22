@@ -1,5 +1,5 @@
-import { prisma } from '../server.ts';
-import { GoalInput } from '../utils/types.ts';
+import { prisma } from '../server';
+import { GoalInput } from '../utils/types';
 
 const createGoal = async (data: GoalInput) => {
   return await prisma.goal.create({

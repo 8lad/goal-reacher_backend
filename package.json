@@ -1,11 +1,10 @@
 {
   "name": "goal-reacher_backend",
   "version": "1.0.0",
-  "main": "index.js",
+  "main": "./src/server.js",
   "repository": "git@github.com:8lad/goal-reacher_backend.git",
   "author": "Vlad <vlasisla1988@gmail.com>",
   "license": "MIT",
-  "type": "module",
   "devDependencies": {
     "@eslint/js": "^9.1.1",
     "@types/bcrypt": "^5.0.2",
@@ -39,7 +38,9 @@
     "typescript-eslint": "^7.8.0"
   },
   "scripts": {
+    "start": "node ./build/src/server.js",
     "prepare": "husky",
+    "build": "tsc",
     "lint": "eslint .",
     "lint:fix": "eslint --fix .",
     "dev": "cross-env NODE_ENV=development nodemon",

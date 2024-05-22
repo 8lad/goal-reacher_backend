@@ -1,8 +1,8 @@
 import { NextFunction, Response } from 'express';
 import bcrypt from 'bcrypt';
-import { RequestWithToken, UserRequestBody } from '../utils/types.ts';
-import { createSelectDatabaseObject, getErrorResponseObject } from '../utils/helpers.ts';
-import userRepository from '../repositories/user.repository.ts';
+import { RequestWithToken, UserRequestBody } from '../utils/types';
+import { createSelectDatabaseObject, getErrorResponseObject } from '../utils/helpers';
+import userRepository from '../repositories/user.repository';
 
 export const checkPassword = async (
   req: RequestWithToken<UserRequestBody>,

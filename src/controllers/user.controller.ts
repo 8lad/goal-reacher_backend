@@ -1,10 +1,10 @@
 import { Response, Request } from 'express';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
-import { UserRequestBody, RequestWithToken, CustomRequest } from '../utils/types.ts';
-import { getErrorResponseObject, getSuccessResponseObject } from '../utils/helpers.ts';
-import UserRepository from '../repositories/user.repository.ts';
-import { SALT } from '../utils/constants.ts';
+import { UserRequestBody, RequestWithToken, CustomRequest } from '../utils/types';
+import { getErrorResponseObject, getSuccessResponseObject } from '../utils/helpers';
+import UserRepository from '../repositories/user.repository';
+import { SALT } from '../utils/constants';
 
 const createUser = async (
   req: CustomRequest<Omit<UserRequestBody, 'isDeleted'>>,

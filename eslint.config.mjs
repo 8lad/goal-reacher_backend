@@ -15,4 +15,7 @@ export default [
       'no-console': ['warn', { allow: ['warn', 'error', 'info'] }],
     },
   },
+  {
+    ignores: ['node_modules', 'build'],
+  },
 ];

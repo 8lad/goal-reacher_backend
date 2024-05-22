@@ -1,10 +1,10 @@
 import { Router } from 'express';
-import UserController from '../controllers/user.controller.ts';
-import { RouterPaths } from '../utils/constants.ts';
-import { verifyUser } from '../services/verifyUser.ts';
-import { checkPassword } from '../services/checkPassword.ts';
-import { validateRequestBody } from '../services/validateRequestBody.ts';
-import UserSchema from '../schemas/user.schema.ts';
+import UserController from '../controllers/user.controller';
+import { RouterPaths } from '../utils/constants';
+import { verifyUser } from '../services/verifyUser';
+import { checkPassword } from '../services/checkPassword';
+import { validateRequestBody } from '../services/validateRequestBody';
+import UserSchema from '../schemas/user.schema';
 
 const router = Router();
 

@@ -1,4 +1,4 @@
-import { UserResponseObject, UserResponseStatus } from './types.ts';
+import { UserResponseObject, UserResponseStatus } from './types';
 
 export const getErrorResponseObject = (message: string): UserResponseObject => {
   return { message, status: UserResponseStatus.Error };

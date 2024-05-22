@@ -1,7 +1,7 @@
 import { Response, Request } from 'express';
-import { GoalRequestBody, RequestWithToken, GoalStatus } from '../utils/types.ts';
-import { getErrorResponseObject, getSuccessResponseObject } from '../utils/helpers.ts';
-import GoalRepository from '../repositories/goal.repository.ts';
+import { GoalRequestBody, RequestWithToken, GoalStatus } from '../utils/types';
+import { getErrorResponseObject, getSuccessResponseObject } from '../utils/helpers';
+import GoalRepository from '../repositories/goal.repository';
 
 const createGoal = async (req: RequestWithToken<GoalRequestBody>, res: Response) => {
   try {
@@ -58,8 +58,26 @@ const getSingleGoal = async (req: RequestWithToken<unknown>, res: Response) => {
     const singleGoal = await GoalRepository.getSingleGoal(goalId, Number(req.userId));
     res.status(200).json(singleGoal);
   } catch (error) {
-    res.status(500).json(getErrorResponseObject("Internal server error. Can't get curren goal"));
+    res
+      .status(500)
+      .json(getErrorResponseObject("Internal server error. Can't get curren the goal"));
   }
+};
+
+const updateSingleGoal = async (req: RequestWithToken<GoalRequestBody>, res: Response) => {
+  const userId = Number(req.userId);
+  const goalId = Number(req.params.id);
+  const newGoalData = {
+    userId,
+    ...req.body,
+  };
+  try {
+    const updatedGoal = await GoalRepository.updateSingleGoal(goalId, newGoalData);
+    res.status(200).json(updatedGoal);
+  } catch (error) {
+    res.status(500).json(getErrorResponseObject("Internal server error. Can't update the goal"));
+  }
+  return;
 };
 
 export default {
@@ -67,4 +85,5 @@ export default {
   deleteGoal,
   getAllGoals,
   getSingleGoal,
+  updateSingleGoal,
 };

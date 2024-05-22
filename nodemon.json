@@ -2,7 +2,7 @@
   "watch": ["src/"],
   "ignore": ["node_modules/**/*"],
   "verbose": true,
-  "exec": "node --loader ts-node/esm ./src/server.ts",
+  "exec": "ts-node ./src/server.ts",
   "delay": 1000,
-  "ext": "ts, js"
+  "ext": ".ts, .js"
 }

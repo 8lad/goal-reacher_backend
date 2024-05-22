@@ -1,4 +1,4 @@
-import { ALL_REQUIRED_ENVS } from './constants.ts';
+import { ALL_REQUIRED_ENVS } from './constants';
 
 export const checkAllEnv = () => {
   const missingEnv = ALL_REQUIRED_ENVS.filter((env) => !process.env[env]);

@@ -1,5 +1,5 @@
-import { prisma } from '../server.ts';
-import { CreateUserInput, UserSelectedFields, UserQuerySelect } from '../utils/types.ts';
+import { prisma } from '../server';
+import { CreateUserInput, UserSelectedFields, UserQuerySelect } from '../utils/types';
 
 const createUser = async (data: CreateUserInput) => {
   return await prisma.user.create({

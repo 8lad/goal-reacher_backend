@@ -4,13 +4,13 @@ import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import helmet from 'helmet';
 import { rateLimit } from 'express-rate-limit';
-import UserRouter from './routes/user.route.ts';
-import GoalRouter from './routes/goal.route.ts';
-import { getErrorResponseObject } from './utils/helpers.ts';
-import { REQUESTS_AMOUNT_LIMIT, REQUESTS_TIME_LIMIT } from './utils/constants.ts';
-import { customErrorHandler } from './services/customErrorHandler.ts';
-import { notFoundErrorHandler } from './services/notFoundErrorHandler.ts';
-import { checkAllEnv } from './utils/checkAllEnv.ts';
+import UserRouter from './routes/user.route';
+import GoalRouter from './routes/goal.route';
+import { getErrorResponseObject } from './utils/helpers';
+import { REQUESTS_AMOUNT_LIMIT, REQUESTS_TIME_LIMIT } from './utils/constants';
+import { customErrorHandler } from './services/customErrorHandler';
+import { notFoundErrorHandler } from './services/notFoundErrorHandler';
+import { checkAllEnv } from './utils/checkAllEnv';
 
 checkAllEnv();
 
@@ -40,14 +40,14 @@ const main = async () => {
     }),
   );
 
-  app.use(process.env.BASE_ROUTE as string, UserRouter);
-  app.use(process.env.BASE_ROUTE as string, GoalRouter);
+  app.use(process.env.BASE_ROUTE!, UserRouter);
+  app.use(process.env.BASE_ROUTE!, GoalRouter);
 
   app.all('*', notFoundErrorHandler);
 
   app.use(customErrorHandler);
 
-  app.listen(process.env.SERVER_PORT, () => {
+  app.listen(process.env.SERVER_PORT || 3000, () => {
     console.info(`Server runs on the ${process.env.SERVER_PORT} port`);
   });
 };
