@@ -17,7 +17,6 @@ router.post(
 router.post(
   RouterPaths.Login,
   validateRequestBody(UserSchema.loginUserSchema),
-  checkPassword,
   UserController.loginUser,
 );
 
