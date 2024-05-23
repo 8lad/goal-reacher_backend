@@ -14,7 +14,7 @@ export const validateRequestBody = (schema: AnySchema) => {
     } catch (error) {
       res
         .status(500)
-        .json(getErrorResponseObject('Internal server error. Validation request body'));
+        .json(getErrorResponseObject('Internal server error. Issue with request body'));
     }
   };
 };

@@ -11,6 +11,7 @@ import { REQUESTS_AMOUNT_LIMIT, REQUESTS_TIME_LIMIT } from './utils/constants';
 import { customErrorHandler } from './services/customErrorHandler';
 import { notFoundErrorHandler } from './services/notFoundErrorHandler';
 import { checkAllEnv } from './utils/checkAllEnv';
+import { isDevMode } from './utils/isDevMode';
 import { errorLogger } from './services/errorLogger';
 
 checkAllEnv();
@@ -44,9 +45,11 @@ const main = async () => {
   app.use(process.env.BASE_ROUTE!, UserRouter);
   app.use(process.env.BASE_ROUTE!, GoalRouter);
 
-  app.use(errorLogger);
-  app.all('*', notFoundErrorHandler);
+  if (isDevMode()) {
+    app.use(errorLogger);
+  }
 
+  app.all('*', notFoundErrorHandler);
   app.use(customErrorHandler);
 
   app.listen(process.env.SERVER_PORT || 3000, () => {

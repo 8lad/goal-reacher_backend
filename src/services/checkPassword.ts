@@ -1,8 +1,9 @@
 import { NextFunction, Response } from 'express';
 import bcrypt from 'bcrypt';
 import { RequestWithToken, UserRequestBody } from '../utils/types';
-import { createSelectDatabaseObject, getErrorResponseObject } from '../utils/helpers';
+import { createSelectDatabaseObject } from '../utils/helpers';
 import userRepository from '../repositories/user.repository';
+import { CustomError } from '../utils/errorInstance';
 
 export const checkPassword = async (
   req: RequestWithToken<UserRequestBody>,
@@ -13,8 +14,7 @@ export const checkPassword = async (
   const userId = Number(req.userId);
 
   if (!email && !req.userId) {
-    res.status(400).json(getErrorResponseObject('User not found'));
-    return;
+    next(new CustomError('User not found', 404));
   }
 
   try {
@@ -22,23 +22,20 @@ export const checkPassword = async (
     const currentUser = await userRepository.getExistingUser(userId || email, userSelectObject);
 
     if (!currentUser) {
-      res.status(400).json(getErrorResponseObject('User not found'));
-      return;
+      throw new CustomError('User not found', 404);
     }
 
     bcrypt.compare(password, currentUser.password, (error, result) => {
       if (error) {
-        res.status(500).json(getErrorResponseObject('Internal server error. Password validation'));
-        return;
+        next(new CustomError('Internal server error. Password validation', 500));
       }
       if (result) {
         next();
         return;
       }
-      res.status(400).json(getErrorResponseObject('Bed request. Wrong password'));
-      return;
+      next(new CustomError('Bed request. Wrong password', 400));
     });
   } catch (error) {
-    res.status(500).json(getErrorResponseObject('Internal server error. Checking password error'));
+    next(error);
   }
 };

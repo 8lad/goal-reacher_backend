@@ -1,18 +1,16 @@
 import { Request, Response, NextFunction } from 'express';
+import { CustomError } from '../utils/errorInstance';
 
 export const customErrorHandler = (
-  error: Error,
+  error: CustomError,
   req: Request,
   res: Response,
   next: NextFunction,
 ) => {
-  const statusCode = res.statusCode !== 200 ? res.statusCode : 500;
   const responseBody = {
     message: error.message,
-    stack: error.stack,
+    status: error.status,
   };
-
-  console.error('Error: ', responseBody);
-  res.status(statusCode).json(responseBody);
+  res.status(error.statusCode || 500).json(responseBody);
   next();
 };

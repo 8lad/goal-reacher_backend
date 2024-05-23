@@ -6,8 +6,10 @@ export const errorLogger = async (
   res: Response,
   next: NextFunction,
 ) => {
-  if (error) {
-    console.error(error.stack);
-    next(error);
-  }
+  console.error(
+    `*** Error detected ***
+*** Message: ${error.message} ***
+*** Stack: ${error.stack} ***`,
+  );
+  next(error);
 };
