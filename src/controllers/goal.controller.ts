@@ -1,9 +1,14 @@
-import { Response, Request } from 'express';
+import { Response, Request, NextFunction } from 'express';
 import { GoalRequestBody, RequestWithToken, GoalStatus } from '../utils/types';
-import { getErrorResponseObject, getSuccessResponseObject } from '../utils/helpers';
+import { getSuccessResponseObject } from '../utils/helpers';
 import GoalRepository from '../repositories/goal.repository';
+import { CustomError } from '../utils/errorInstance';
 
-const createGoal = async (req: RequestWithToken<GoalRequestBody>, res: Response) => {
+const createGoal = async (
+  req: RequestWithToken<GoalRequestBody>,
+  res: Response,
+  next: NextFunction,
+) => {
   try {
     const newGoalData = {
       ...req.body,
@@ -11,60 +16,59 @@ const createGoal = async (req: RequestWithToken<GoalRequestBody>, res: Response)
       userId: Number(req.userId),
     };
     const newGoal = await GoalRepository.createGoal(newGoalData);
+    if (!newGoal) {
+      throw new CustomError("Internal server error. Couldn't create a new goal");
+    }
     res.status(200).json(newGoal);
   } catch (error) {
-    res
-      .status(500)
-      .json(getErrorResponseObject("Internal server error. Couldn't create a new goal"));
+    next(error);
   }
 };
 
-const deleteGoal = async (req: Request, res: Response) => {
+const deleteGoal = async (req: Request, res: Response, next: NextFunction) => {
   const goalId = req.params.id;
 
   try {
     const deletedGoal = await GoalRepository.deleteGoal(Number(goalId));
     if (!deletedGoal) {
-      res.status(404).json(getErrorResponseObject("Not found. Can't found current goal"));
-      return;
+      throw new CustomError("Not found. Can't found current goal", 404);
     }
 
     res.status(200).json(getSuccessResponseObject('The goal was deleted'));
   } catch (error) {
-    res.status(500).json(getErrorResponseObject("Internal server error. Couldn't delete a goal"));
+    next(error);
   }
 };
 
-const getAllGoals = async (req: RequestWithToken<unknown>, res: Response) => {
+const getAllGoals = async (req: RequestWithToken<unknown>, res: Response, next: NextFunction) => {
   const userId = Number(req.userId);
   try {
     const allGoals = await GoalRepository.getUserGoals(userId);
     if (!allGoals) {
-      res.status(404).json(getErrorResponseObject("Not found. Can't find any goals"));
-      return;
+      throw new CustomError("Not found. Can't find any goals", 404);
     }
     res.status(200).json(allGoals);
   } catch (error) {
-    res
-      .status(500)
-      .json(getErrorResponseObject("Internal server error. Can't get all goals for the user"));
+    next(error);
   }
 };
 
-const getSingleGoal = async (req: RequestWithToken<unknown>, res: Response) => {
+const getSingleGoal = async (req: RequestWithToken<unknown>, res: Response, next: NextFunction) => {
   const goalId = Number(req.params.id);
 
   try {
     const singleGoal = await GoalRepository.getSingleGoal(goalId, Number(req.userId));
     res.status(200).json(singleGoal);
   } catch (error) {
-    res
-      .status(500)
-      .json(getErrorResponseObject("Internal server error. Can't get curren the goal"));
+    next(error);
   }
 };
 
-const updateSingleGoal = async (req: RequestWithToken<GoalRequestBody>, res: Response) => {
+const updateSingleGoal = async (
+  req: RequestWithToken<GoalRequestBody>,
+  res: Response,
+  next: NextFunction,
+) => {
   const userId = Number(req.userId);
   const goalId = Number(req.params.id);
   const newGoalData = {
@@ -75,7 +79,7 @@ const updateSingleGoal = async (req: RequestWithToken<GoalRequestBody>, res: Res
     const updatedGoal = await GoalRepository.updateSingleGoal(goalId, newGoalData);
     res.status(200).json(updatedGoal);
   } catch (error) {
-    res.status(500).json(getErrorResponseObject("Internal server error. Can't update the goal"));
+    next(error);
   }
   return;
 };

@@ -7,10 +7,10 @@ export const customErrorHandler = (
   res: Response,
   next: NextFunction,
 ) => {
-  const responseBody = {
+  const errorResponseObject = {
     message: error.message,
-    status: error.status,
+    status: error.status || 'error',
   };
-  res.status(error.statusCode || 500).json(responseBody);
+  res.status(error.statusCode || 500).json(errorResponseObject);
   next();
 };
