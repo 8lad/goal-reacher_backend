@@ -1,7 +1,7 @@
 import { Response, NextFunction } from 'express';
-import { getErrorResponseObject } from '../utils/helpers';
 import GoalRepository from '../repositories/goal.repository';
 import { RequestWithToken } from '../utils/types';
+import { CustomError } from '../utils/errorInstance';
 
 export const checkGoalExisting = async (
   req: RequestWithToken<unknown>,
@@ -11,17 +11,16 @@ export const checkGoalExisting = async (
   const goalId = req.params.id;
 
   if (!goalId || isNaN(Number(goalId))) {
-    res.status(400).json(getErrorResponseObject('Bad request. Invalid goal id'));
-    return;
+    next(new CustomError('Bad request. Invalid goal id'));
   }
+
   try {
     const singleGoal = await GoalRepository.getSingleGoal(Number(goalId), Number(req.userId));
     if (!singleGoal) {
-      res.status(404).json(getErrorResponseObject("Not found. This goal doesn't exist"));
-      return;
+      throw new CustomError("Not found. This goal doesn't exist", 404);
     }
     next();
   } catch (error) {
-    res.status(500).json(getErrorResponseObject('Internal server error. Single goal error'));
+    next(error);
   }
 };
