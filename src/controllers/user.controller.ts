@@ -1,122 +1,125 @@
-import { Response, Request } from 'express';
+import { Response, Request, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
-import { UserRequestBody, UserRequestWithToken } from '../utils/types.ts';
-import { getErrorResponseObject, getSuccessResponseObject } from '../utils/helpers.ts';
-import UserRepository from '../repositories/user.repository.ts';
-import { SALT } from '../utils/constants.ts';
+import { UserRequestBody, RequestWithToken, CustomRequest } from '../utils/types';
+import { getSuccessResponseObject } from '../utils/helpers';
+import UserRepository from '../repositories/user.repository';
+import { SALT } from '../utils/constants';
+import { CustomError } from '../utils/errorInstance';
 
-const createUser = async (req: UserRequestBody, res: Response) => {
+const createUser = async (
+  req: CustomRequest<Omit<UserRequestBody, 'isDeleted'>>,
+  res: Response,
+  next: NextFunction,
+) => {
   try {
     const { name, email, password } = req.body;
-
-    if (!password || !email || !name) {
-      res.status(400).json(getErrorResponseObject('Bad request. Empty input fields'));
-      return;
-    }
 
     const existingUser = await UserRepository.getExistingUser(email);
 
     if (existingUser && existingUser.isDeleted) {
-      return res.status(400).json(getErrorResponseObject('This account was deleted'));
+      throw new CustomError('This account was deleted', 403);
     }
 
     if (existingUser) {
-      return res.status(400).json(getErrorResponseObject('User already exists'));
+      throw new CustomError('User already exists', 403);
     }
 
     bcrypt.hash(password, SALT, async (error, hash) => {
-      if (error) {
-        return res.status(400).json(getErrorResponseObject('Hashing password issue'));
+      if (error || !hash) {
+        next(new CustomError('Hashing password issue', 500));
+        return;
       }
 
       const newUserData = { name, email, password: hash };
-      await UserRepository.createUser(newUserData);
-
+      const newUser = await UserRepository.createUser(newUserData);
+      if (!newUser) {
+        next(new CustomError("Internal server error. Can't create new user", 500));
+        return;
+      }
       res.status(201).json(getSuccessResponseObject('User created'));
     });
   } catch (error) {
-    res.status(500).json(getErrorResponseObject('Registration error. Try again later'));
+    next(error);
   }
 };
 
-const loginUser = async (req: UserRequestBody, res: Response) => {
+const loginUser = async (
+  req: CustomRequest<UserRequestBody>,
+  res: Response,
+  next: NextFunction,
+) => {
   const { email, password } = req.body;
-
-  if (!email || !password) {
-    res.status(400).json(getErrorResponseObject('Bad request. Empty input fields'));
-    return;
-  }
 
   try {
     const user = await UserRepository.getExistingUser(email);
     if (!user) {
-      res.status(400).json(getErrorResponseObject('User not found'));
-      return;
+      throw new CustomError('User not found', 404);
     }
 
     if (user.isDeleted) {
-      res.status(400).json(getErrorResponseObject('This account is unavailable now'));
-      return;
+      throw new CustomError('This account was deleted', 403);
     }
 
     bcrypt.compare(password, user.password, (error, response) => {
       if (error) {
-        res.status(500).json(getErrorResponseObject('Password uncoding issue'));
+        next(new CustomError('Password uncoding issue', 500));
         return;
       }
       if (response) {
         const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET as string, {
           expiresIn: '1h',
         });
-        res.cookie('token', token, { secure: true });
-        //TODO Update option for cookie when is ready to deploy on the real server {httpOnly: true}
+
+        res.cookie('token', token, { secure: true, httpOnly: true });
         res.status(200).json(getSuccessResponseObject('Login success'));
         return;
       }
-      res.status(400).json(getErrorResponseObject('Password is not matched'));
+      next(new CustomError('Bad request. Password is not matched', 403));
     });
   } catch (error) {
-    res.status(400).json(getErrorResponseObject('Can`t find the exact user'));
+    next(error);
   }
 };
 
-const logoutUser = async (req: Request, res: Response) => {
+const logoutUser = async (req: Request, res: Response, next: NextFunction) => {
   try {
     res.clearCookie('token');
     res.status(200).json(getSuccessResponseObject('Loguout success'));
   } catch (error) {
-    res.status(500).json(getErrorResponseObject('Logout error'));
+    next(error);
   }
 };
 
-const deleteUser = async (req: UserRequestWithToken, res: Response) => {
-  const { password } = req.body;
+const deleteUser = async (
+  req: RequestWithToken<UserRequestBody>,
+  res: Response,
+  next: NextFunction,
+) => {
   try {
-    if (!password) {
-      res.status(400).json(getErrorResponseObject('Bad request. Empty input fields'));
-      return;
-    }
-
     await UserRepository.deleteUser(req.userId!);
     res.clearCookie('token');
     res.status(200).json(getSuccessResponseObject('User deleted'));
   } catch (error) {
-    res.status(500).json(getErrorResponseObject('Delete user error'));
+    next(error);
   }
 };
 
-const updateUser = async (req: UserRequestWithToken, res: Response) => {
-  const { email, name } = req.body;
+const updateUser = async (
+  req: RequestWithToken<UserRequestBody>,
+  res: Response,
+  next: NextFunction,
+) => {
+  const { name } = req.body;
+  const userId = Number(req.userId);
   try {
-    const user = await UserRepository.updateUser(email!, name!);
+    const user = await UserRepository.updateUser(userId, name);
     if (!user) {
-      res.status(400).json(getErrorResponseObject('User not found'));
-      return;
+      throw new CustomError('User not found', 404);
     }
-    res.status(200).json(getSuccessResponseObject('User data updated'));
+    res.status(200).json({ id: user.id, name: user.name, email: user.email });
   } catch (error) {
-    res.status(500).json(getErrorResponseObject('Update user error'));
+    next(error);
   }
 };
 

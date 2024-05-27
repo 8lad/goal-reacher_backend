@@ -1,11 +1,10 @@
 {
   "name": "goal-reacher_backend",
   "version": "1.0.0",
-  "main": "index.js",
+  "main": "./src/server.js",
   "repository": "git@github.com:8lad/goal-reacher_backend.git",
   "author": "Vlad <vlasisla1988@gmail.com>",
   "license": "MIT",
-  "type": "module",
   "devDependencies": {
     "@eslint/js": "^9.1.1",
     "@types/bcrypt": "^5.0.2",
@@ -14,6 +13,8 @@
     "@types/express": "^4.17.21",
     "@types/jsonwebtoken": "^9.0.6",
     "@types/node": "^20.12.7",
+    "@types/node-cron": "^3.0.11",
+    "cross-env": "^7.0.3",
     "eslint": "^9.1.1",
     "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-prettier": "^5.1.3",
@@ -33,14 +34,19 @@
     "express": "^4.19.2",
     "express-rate-limit": "^7.2.0",
     "helmet": "^7.1.0",
+    "joi": "^17.13.1",
     "jsonwebtoken": "^9.0.2",
+    "node-cron": "^3.0.3",
     "typescript-eslint": "^7.8.0"
   },
   "scripts": {
+    "start": "node ./build/src/server.js",
     "prepare": "husky",
+    "build": "tsc",
     "lint": "eslint .",
     "lint:fix": "eslint --fix .",
-    "dev": "nodemon",
+    "dev": "cross-env NODE_ENV=development nodemon",
+    "dev:simple": "nodemon",
     "db:migrate": "npx prisma migrate dev --name goal-reacher --create-only && npx prisma generate",
     "db:push": "npx prisma db push"
   }

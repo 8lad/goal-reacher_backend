@@ -27,14 +27,16 @@ goals Goal[]
 model Goal {
 id Int @id @default(autoincrement())
 createdAt DateTime @default(now())
-emoji String
-measureType GoalMeasure @default(HOURS)
+emoji String?
+measureType GoalMeasure
 title String
 content String
 finalDate DateTime
-failMotivation String
-successMotivation String
-step Int
+failMotivation String?
+successMotivation String?
+finalGoal Int
+progress Int @default(0)
+status GoalStatus?
 user User @relation(fields: [userId], references: [id])
 userId Int
 categoryId Int?
@@ -53,4 +55,10 @@ goals Goal[]
 enum GoalMeasure {
   HOURS
   NUMBERS
+}
+
+enum GoalStatus  {
+  PENDING
+  FAILED 
+  SUCCESS
 }

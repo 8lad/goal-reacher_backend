@@ -1,15 +1,26 @@
-import express, { Response, Request, NextFunction } from 'express';
+import express from 'express';
 import { PrismaClient } from '@prisma/client';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import helmet from 'helmet';
 import { rateLimit } from 'express-rate-limit';
-import UserRouter from './routes/user.route.ts';
-import { getErrorResponseObject } from './utils/helpers.ts';
-import { REQUESTS_AMOUNT_LIMIT, REQUESTS_TIME_LIMIT } from './utils/constants.ts';
+import UserRouter from './routes/user.route';
+import GoalRouter from './routes/goal.route';
+import { getErrorResponseObject } from './utils/helpers';
+import { CRON_TIME_SCHEMA, REQUESTS_AMOUNT_LIMIT, REQUESTS_TIME_LIMIT } from './utils/constants';
+import { customErrorHandler } from './services/customErrorHandler';
+import { notFoundErrorHandler } from './services/notFoundErrorHandler';
+import { checkAllEnv } from './utils/checkAllEnv';
+import { isDevMode } from './utils/isDevMode';
+import { errorLogger } from './services/errorLogger';
+import cron from 'node-cron';
+import { goalsPereodicUpdating } from './services/goalsPereodicUpdating';
+
+checkAllEnv();
 
 const app = express();
 export const prisma = new PrismaClient();
+const originUrl = isDevMode() ? '*' : process.env.ORIGIN_URL;
 
 const main = async () => {
   app.use(express.json());
@@ -29,24 +40,24 @@ const main = async () => {
 
   app.use(
     cors({
-      origin: '*',
+      origin: originUrl,
       methods: ['GET', 'PUT', 'POST', 'DELETE'],
     }),
   );
 
-  app.use(process.env.BASE_ROUTE as string, UserRouter);
+  cron.schedule(CRON_TIME_SCHEMA, goalsPereodicUpdating);
 
-  app.all('*', (req: Request, res: Response) => {
-    res.status(404).json({ error: 'Route not found' });
-  });
+  app.use(process.env.BASE_ROUTE!, UserRouter);
+  app.use(process.env.BASE_ROUTE!, GoalRouter);
 
-  app.use((error: Error, req: Request, res: Response, next: NextFunction) => {
-    console.error(error.stack);
-    res.status(500).json({ error: 'Internal server error' });
-    next();
-  });
+  if (isDevMode()) {
+    app.use(errorLogger);
+  }
 
-  app.listen(process.env.SERVER_PORT, () => {
+  app.all('*', notFoundErrorHandler);
+  app.use(customErrorHandler);
+
+  app.listen(process.env.SERVER_PORT || 3000, () => {
     console.info(`Server runs on the ${process.env.SERVER_PORT} port`);
   });
 };

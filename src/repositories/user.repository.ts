@@ -1,5 +1,5 @@
-import { prisma } from '../server.ts';
-import { CreateUserInput, UserSelectedFields, UserQuerySelect } from '../utils/types.ts';
+import { prisma } from '../server';
+import { CreateUserInput, UserSelectedFields, UserQuerySelect } from '../utils/types';
 
 const createUser = async (data: CreateUserInput) => {
   return await prisma.user.create({
@@ -7,10 +7,12 @@ const createUser = async (data: CreateUserInput) => {
   });
 };
 
-const getExistingUser = async (email: string, selectObject?: UserSelectedFields) => {
+const getExistingUser = async (searchParam: number | string, selectObject?: UserSelectedFields) => {
+  const paramObject =
+    typeof searchParam === 'string' ? { email: searchParam } : { id: searchParam };
   const query: UserQuerySelect = {
     where: {
-      email,
+      ...paramObject,
     },
   };
 
@@ -31,10 +33,10 @@ const deleteUser = async (userId: string) =>
     },
   });
 
-const updateUser = async (email: string, name: string) =>
+const updateUser = async (id: number, name: string) =>
   await prisma.user.update({
     where: {
-      email,
+      id,
     },
     data: {
       name,

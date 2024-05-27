@@ -1,19 +1,41 @@
 import { Router } from 'express';
-import UserController from '../controllers/user.controller.ts';
-import { RouterPaths } from '../utils/constants.ts';
-import { verifyUser } from '../services/verifyUser.ts';
-import { checkPassword } from '../services/checkPassword.ts';
+import UserController from '../controllers/user.controller';
+import { RouterPaths } from '../utils/constants';
+import { verifyUser } from '../services/verifyUser';
+import { checkPassword } from '../services/checkPassword';
+import { validateRequestBody } from '../services/validateRequestBody';
+import UserSchema from '../schemas/user.schema';
 
 const router = Router();
 
-router.post(RouterPaths.Register, UserController.createUser);
+router.post(
+  RouterPaths.Register,
+  validateRequestBody(UserSchema.createUserSchema),
+  UserController.createUser,
+);
 
-router.post(RouterPaths.Login, checkPassword, UserController.loginUser);
+router.post(
+  RouterPaths.Login,
+  validateRequestBody(UserSchema.loginUserSchema),
+  UserController.loginUser,
+);
 
 router.get(RouterPaths.Logout, verifyUser, UserController.logoutUser);
 
-router.patch(RouterPaths.DeleteUser, verifyUser, checkPassword, UserController.deleteUser);
+router.patch(
+  RouterPaths.DeleteUser,
+  verifyUser,
+  validateRequestBody(UserSchema.deleteUserSchema),
+  checkPassword,
+  UserController.deleteUser,
+);
 
-router.patch(RouterPaths.UpdateUser, verifyUser, checkPassword, UserController.updateUser);
+router.patch(
+  RouterPaths.UpdateUser,
+  verifyUser,
+  validateRequestBody(UserSchema.updateUserSchema),
+  checkPassword,
+  UserController.updateUser,
+);
 
 export default router;
