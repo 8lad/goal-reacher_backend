@@ -13,11 +13,13 @@ import { notFoundErrorHandler } from './services/notFoundErrorHandler';
 import { checkAllEnv } from './utils/checkAllEnv';
 import { isDevMode } from './utils/isDevMode';
 import { errorLogger } from './services/errorLogger';
+import cron from 'node-cron';
 
 checkAllEnv();
 
 const app = express();
 export const prisma = new PrismaClient();
+const originUrl = isDevMode() ? '*' : process.env.ORIGIN_URL;
 
 const main = async () => {
   app.use(express.json());
@@ -37,10 +39,14 @@ const main = async () => {
 
   app.use(
     cors({
-      origin: '*',
+      origin: originUrl,
       methods: ['GET', 'PUT', 'POST', 'DELETE'],
     }),
   );
+
+  cron.schedule(' */1 * * * *', () => {
+    console.info('Cron running');
+  });
 
   app.use(process.env.BASE_ROUTE!, UserRouter);
   app.use(process.env.BASE_ROUTE!, GoalRouter);

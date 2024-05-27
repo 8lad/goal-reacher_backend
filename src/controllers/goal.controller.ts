@@ -1,5 +1,6 @@
 import { Response, Request, NextFunction } from 'express';
-import { GoalRequestBody, RequestWithToken, GoalStatus } from '../utils/types';
+import { GoalStatus } from '@prisma/client';
+import { GoalRequestBody, RequestWithToken, SingleGoalRequest } from '../utils/types';
 import { getSuccessResponseObject } from '../utils/helpers';
 import GoalRepository from '../repositories/goal.repository';
 import { CustomError } from '../utils/errorInstance';
@@ -65,7 +66,7 @@ const getSingleGoal = async (req: RequestWithToken<unknown>, res: Response, next
 };
 
 const updateSingleGoal = async (
-  req: RequestWithToken<GoalRequestBody>,
+  req: SingleGoalRequest<GoalRequestBody>,
   res: Response,
   next: NextFunction,
 ) => {

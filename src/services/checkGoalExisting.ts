@@ -1,10 +1,10 @@
 import { Response, NextFunction } from 'express';
 import GoalRepository from '../repositories/goal.repository';
-import { RequestWithToken } from '../utils/types';
+import { SingleGoalRequest } from '../utils/types';
 import { CustomError } from '../utils/errorInstance';
 
 export const checkGoalExisting = async (
-  req: RequestWithToken<unknown>,
+  req: SingleGoalRequest<unknown>,
   res: Response,
   next: NextFunction,
 ) => {
@@ -19,6 +19,7 @@ export const checkGoalExisting = async (
     if (!singleGoal) {
       throw new CustomError("Not found. This goal doesn't exist", 404);
     }
+    req.singleGoal = singleGoal;
     next();
   } catch (error) {
     next(error);

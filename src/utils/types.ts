@@ -1,4 +1,4 @@
-import { GoalMeasure, Prisma } from '@prisma/client';
+import { GoalMeasure, Prisma, GoalStatus } from '@prisma/client';
 import { Request } from 'express';
 
 export type RequireExcept<T, K extends keyof T> = Required<T> & Partial<Pick<T, K>>;
@@ -14,6 +14,12 @@ export interface CustomRequest<T> extends Request {
 }
 export interface RequestWithToken<T> extends Request {
   userId?: string;
+  body: T;
+}
+
+export interface SingleGoalRequest<T> extends Request {
+  userId?: string;
+  singleGoal?: GoalInput;
   body: T;
 }
 
@@ -42,25 +48,19 @@ export interface UserQuerySelect {
 }
 
 export interface GoalRequestBody {
-  emoji: string;
+  emoji: string | null;
   measureType: GoalMeasure;
   title: string;
   content: string;
-  finalDate: string;
+  finalDate: Date;
   progress: number;
   finalGoal: number;
-  failMotivation?: string;
-  successMotivation?: string;
-  categoryId?: number;
-  status?: GoalStatus;
+  failMotivation?: string | null;
+  successMotivation?: string | null;
+  categoryId?: number | null;
+  status?: GoalStatus | null;
 }
 
 export interface GoalInput extends GoalRequestBody {
   userId: number;
-}
-
-export enum GoalStatus {
-  PENDING = 'PENDING',
-  FAILED = 'FAILED',
-  SUCCESS = 'SUCCESS',
 }
