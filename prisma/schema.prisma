@@ -1,0 +1,64 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+id Int @id @default(autoincrement())
+name String
+email String @unique
+password String
+createdAt DateTime @default(now())
+isDeleted Boolean @default(false)
+goals Goal[]
+@@map("users")
+}
+
+model Goal {
+id Int @id @default(autoincrement())
+createdAt DateTime @default(now())
+emoji String?
+measureType GoalMeasure
+title String
+content String
+finalDate DateTime
+failMotivation String?
+successMotivation String?
+finalGoal Int
+progress Int @default(0)
+status GoalStatus?
+user User @relation(fields: [userId], references: [id])
+userId Int
+categoryId Int?
+category Category? @relation(fields: [categoryId], references: [id])
+@@map("goals")
+}
+
+model Category {
+id Int @id @default(autoincrement())
+name String @unique
+goals Goal[] 
+@@map("categories")
+}
+
+
+enum GoalMeasure {
+  HOURS
+  NUMBERS
+}
+
+enum GoalStatus  {
+  PENDING
+  FAILED 
+  SUCCESS
+}
