@@ -1,6 +1,6 @@
-import { GoalStatus } from '@prisma/client';
+import { GoalStatus, Prisma } from '@prisma/client';
 import { prisma } from '../server';
-import { GoalInput } from '../utils/types';
+import { AscDescSorting, GoalInput } from '../utils/types';
 
 const createGoal = async (data: GoalInput) => {
   return await prisma.goal.create({
@@ -25,10 +25,29 @@ const getSingleGoal = async (goalId: number, userId: number) => {
   });
 };
 
-const getUserGoals = async (userId: number) => {
+const getUserGoals = async (userId: number, queryParams?: Prisma.GoalWhereInput) => {
+  const isTitleAscDescSorted = queryParams?.title === 'asc' || queryParams?.title === 'desc';
+  const whereQueryParams = {
+    ...(queryParams?.status ? { status: queryParams?.status } : {}),
+    ...(queryParams?.title && !isTitleAscDescSorted
+      ? { title: { contains: queryParams.title as string } }
+      : {}),
+  };
+
+  const orderByQueryParams = {
+    ...(queryParams?.finalDate ? { finalDate: queryParams.finalDate as AscDescSorting } : {}),
+    ...(queryParams?.title && isTitleAscDescSorted
+      ? { title: queryParams.title as AscDescSorting }
+      : {}),
+  };
+
   return await prisma.goal.findMany({
     where: {
       userId,
+      ...whereQueryParams,
+    },
+    orderBy: {
+      ...orderByQueryParams,
     },
   });
 };

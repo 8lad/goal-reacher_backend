@@ -43,8 +43,9 @@ const deleteGoal = async (req: Request, res: Response, next: NextFunction) => {
 
 const getAllGoals = async (req: RequestWithToken<unknown>, res: Response, next: NextFunction) => {
   const userId = Number(req.userId);
+  const queryParams = req.query;
   try {
-    const allGoals = await GoalRepository.getUserGoals(userId);
+    const allGoals = await GoalRepository.getUserGoals(userId, queryParams);
     if (!allGoals) {
       throw new CustomError("Not found. Can't find any goals", 404);
     }

@@ -64,3 +64,5 @@ export interface GoalRequestBody {
 export interface GoalInput extends GoalRequestBody {
   userId: number;
 }
+
+export type AscDescSorting = 'asc' | 'desc';
