@@ -1,3 +1,4 @@
+import { GoalStatus } from '@prisma/client';
 import { prisma } from '../server';
 import { GoalInput } from '../utils/types';
 
@@ -46,10 +47,22 @@ const updateSingleGoal = async (
   });
 };
 
+const getExpiredGoals = async () => {
+  return await prisma.goal.findMany({
+    where: {
+      finalDate: {
+        lte: new Date(),
+      },
+      status: GoalStatus.PENDING,
+    },
+  });
+};
+
 export default {
   createGoal,
   deleteGoal,
   getSingleGoal,
   getUserGoals,
   updateSingleGoal,
+  getExpiredGoals,
 };

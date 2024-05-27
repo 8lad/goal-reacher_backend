@@ -1,31 +1,22 @@
 import { GoalStatus } from '@prisma/client';
 import { prisma } from '../server';
+import GoalRepository from '../repositories/goal.repository';
+import { GoalInput } from '../utils/types';
 
 export const goalsPereodicUpdating = async () => {
   try {
-    await prisma.$transaction(async (prisma) => {
-      const allExpiredGoals = await prisma.goal.findMany({
-        where: {
-          finalDate: {
-            lte: new Date(),
-          },
-          status: GoalStatus.PENDING,
-        },
-      });
+    await prisma.$transaction(async () => {
+      const allExpiredGoals = await GoalRepository.getExpiredGoals();
+
       if (allExpiredGoals.length === 0) {
         return;
       }
       for (const goal of allExpiredGoals) {
         const newGoalStatus =
           goal.finalGoal > goal.progress ? GoalStatus.FAILED : GoalStatus.SUCCESS;
-        await prisma.goal.update({
-          where: {
-            id: goal.id,
-          },
-          data: {
-            status: newGoalStatus,
-          },
-        });
+        const newGoalData = { status: newGoalStatus } as GoalInput;
+
+        await GoalRepository.updateSingleGoal(goal.id, newGoalData);
       }
     });
   } catch (error) {
