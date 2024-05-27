@@ -7,13 +7,14 @@ import { rateLimit } from 'express-rate-limit';
 import UserRouter from './routes/user.route';
 import GoalRouter from './routes/goal.route';
 import { getErrorResponseObject } from './utils/helpers';
-import { REQUESTS_AMOUNT_LIMIT, REQUESTS_TIME_LIMIT } from './utils/constants';
+import { CRON_TIME_SCHEMA, REQUESTS_AMOUNT_LIMIT, REQUESTS_TIME_LIMIT } from './utils/constants';
 import { customErrorHandler } from './services/customErrorHandler';
 import { notFoundErrorHandler } from './services/notFoundErrorHandler';
 import { checkAllEnv } from './utils/checkAllEnv';
 import { isDevMode } from './utils/isDevMode';
 import { errorLogger } from './services/errorLogger';
 import cron from 'node-cron';
+import { goalsPereodicUpdating } from './services/goalsPereodicUpdating';
 
 checkAllEnv();
 
@@ -44,9 +45,7 @@ const main = async () => {
     }),
   );
 
-  cron.schedule(' */1 * * * *', () => {
-    console.info('Cron running');
-  });
+  cron.schedule(CRON_TIME_SCHEMA, goalsPereodicUpdating);
 
   app.use(process.env.BASE_ROUTE!, UserRouter);
   app.use(process.env.BASE_ROUTE!, GoalRouter);

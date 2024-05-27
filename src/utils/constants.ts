@@ -19,3 +19,5 @@ export const ALL_REQUIRED_ENVS = [
   'JWT_SECRET',
   'ORIGIN_URL',
 ];
+
+export const CRON_TIME_SCHEMA = '*/1 * * * *';
