@@ -1,13 +1,9 @@
 import { NextFunction, Response } from 'express';
 import jwt, { JwtPayload } from 'jsonwebtoken';
-import { GoalRequestBody, RequestWithToken, UserRequestBody } from '../utils/types';
+import { RequestWithToken } from '../utils/types';
 import { CustomError } from '../utils/errorInstance';
 
-export const verifyUser = (
-  req: RequestWithToken<UserRequestBody | GoalRequestBody>,
-  res: Response,
-  next: NextFunction,
-) => {
+export const verifyUser = (req: RequestWithToken<unknown>, res: Response, next: NextFunction) => {
   const token = req.cookies.token;
 
   if (!token) {

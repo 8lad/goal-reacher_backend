@@ -7,6 +7,7 @@ export enum RouterPaths {
   Dashboards = '/dashboards',
   Goals = '/goals',
   SingleGoal = '/goals/:id',
+  Categories = '/categories',
 }
 
 export const SALT = 10;
@@ -20,4 +21,4 @@ export const ALL_REQUIRED_ENVS = [
   'ORIGIN_URL',
 ];
 
-export const CRON_TIME_SCHEMA = '*/1 * * * *';
+export const CRON_TIME_SCHEMA = '*/3 * * * *';

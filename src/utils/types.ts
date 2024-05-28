@@ -66,3 +66,8 @@ export interface GoalInput extends GoalRequestBody {
 }
 
 export type AscDescSorting = 'asc' | 'desc';
+
+export interface CategoryRequestBody {
+  categoryName: string;
+  categoryId: number;
+}

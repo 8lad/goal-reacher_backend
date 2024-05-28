@@ -49,6 +49,9 @@ const getUserGoals = async (userId: number, queryParams?: Prisma.GoalWhereInput)
     orderBy: {
       ...orderByQueryParams,
     },
+    include: {
+      category: true,
+    },
   });
 };
 
