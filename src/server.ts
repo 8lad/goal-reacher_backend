@@ -6,6 +6,7 @@ import helmet from 'helmet';
 import { rateLimit } from 'express-rate-limit';
 import UserRouter from './routes/user.route';
 import GoalRouter from './routes/goal.route';
+import CategoryRouter from './routes/category.route';
 import { getErrorResponseObject } from './utils/helpers';
 import { CRON_TIME_SCHEMA, REQUESTS_AMOUNT_LIMIT, REQUESTS_TIME_LIMIT } from './utils/constants';
 import { customErrorHandler } from './services/customErrorHandler';
@@ -49,6 +50,7 @@ const main = async () => {
 
   app.use(process.env.BASE_ROUTE!, UserRouter);
   app.use(process.env.BASE_ROUTE!, GoalRouter);
+  app.use(process.env.BASE_ROUTE!, CategoryRouter);
 
   if (isDevMode()) {
     app.use(errorLogger);

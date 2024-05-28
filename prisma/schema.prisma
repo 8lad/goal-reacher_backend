@@ -21,6 +21,7 @@ password String
 createdAt DateTime @default(now())
 isDeleted Boolean @default(false)
 goals Goal[]
+categories Category []
 @@map("users")
 }
 
@@ -30,7 +31,7 @@ createdAt DateTime @default(now())
 emoji String?
 measureType GoalMeasure
 title String
-content String
+content String @db.LongText
 finalDate DateTime
 failMotivation String?
 successMotivation String?
@@ -46,7 +47,9 @@ category Category? @relation(fields: [categoryId], references: [id])
 
 model Category {
 id Int @id @default(autoincrement())
-name String @unique
+name String 
+userId Int
+user User @relation(fields: [userId], references: [id]) 
 goals Goal[] 
 @@map("categories")
 }
