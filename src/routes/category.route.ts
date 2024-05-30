@@ -16,11 +16,6 @@ router.post(
   CategoryController.createSingleCategory,
 );
 
-router.delete(
-  RouterPaths.Categories,
-  verifyUser,
-  validateRequestBody(CategorySchema.DeleteCategorySchema),
-  CategoryController.deleteSingleCategory,
-);
+router.delete(RouterPaths.Category, verifyUser, CategoryController.deleteSingleCategory);
 
 export default router;
