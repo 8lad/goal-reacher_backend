@@ -7,7 +7,7 @@ export enum RouterPaths {
   Goals = '/goals',
   SingleGoal = '/goals/:id',
   Categories = '/categories',
-  Category = '/category/:id',
+  SingleCategory = '/categories/:id',
 }
 
 export const SALT = 10;
