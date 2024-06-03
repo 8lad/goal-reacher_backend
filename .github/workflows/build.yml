@@ -1,22 +1,22 @@
 name: CI - Build the project
 
-on: 
-  push: 
-    branches: [ main, develop ] 
+on:
+  push:
+    branches: [main, develop]
   pull_request:
-    branches: [ main, develop ]
+    branches: [main, develop]
 
-jobs: 
+jobs:
   build:
     runs-on: ubuntu-latest
     strategy:
-      matrix: 
-        node-version: [ 18 ]
-    steps: 
-      - uses: actions/checkout@v2
+      matrix:
+        node-version: [18]
+    steps:
+      - uses: actions/checkout@v4
       - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v2
-        with: 
+        uses: actions/setup-node@v4
+        with:
           node-version: ${{ matrix.node-version }}
       - name: Node installation
         run: echo "Node is installed"
@@ -26,4 +26,3 @@ jobs:
         run: yarn lint:fix
       - name: Build the project
         run: yarn build
-      
